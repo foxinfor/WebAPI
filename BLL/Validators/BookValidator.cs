@@ -1,12 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BLL.DTO;
+using FluentValidation;
 
 namespace BLL.Validators
 {
-    internal class BookValidator
+    public class BookValidator : AbstractValidator<BookDTO>
     {
+        public BookValidator()
+        {
+            RuleFor(b => b.Title)
+                .NotEmpty().WithMessage("Title is required.")
+                .MaximumLength(200).WithMessage("Title must be less than 200 characters.");
+
+            RuleFor(b => b.PublishedYear)
+                .InclusiveBetween(1450, DateTime.Now.Year)
+                .WithMessage($"Published year must be between 1450 and {DateTime.Now.Year}.");
+
+            RuleFor(b => b.AuthorId)
+                .NotEmpty().WithMessage("AuthorId is required.");
+        }
     }
 }

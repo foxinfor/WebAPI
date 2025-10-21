@@ -3,43 +3,54 @@ using DAL.Models;
 
 namespace DAL.Repository
 {
-    public class AuthorRepository : IAuthorRepository
+    internal class AuthorRepository : IAuthorRepository
     {
         private readonly List<Author> _authors = new();
 
-        public Task<IEnumerable<Author>> GetAllAsync()
+        public Task<Author> CreateAsync(Author entity, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_authors.AsEnumerable());
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _authors.Add(entity);
+            return Task.FromResult(entity);
         }
 
-        public Task<Author?> GetByIdAsync(Guid id)
+        public Task<IEnumerable<Author>> GetAllAsync(CancellationToken cancellationToken)
         {
-            var author = _authors.FirstOrDefault(a => a.Id == id);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.FromResult<IEnumerable<Author>>(_authors);
+        }
+
+        public Task<Author?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var author = _authors.Find(a => a.Id == id);
             return Task.FromResult(author);
         }
 
-        public Task AddAsync(Author entity)
+        public Task DeleteAsync(Author entity, CancellationToken cancellationToken)
         {
-            _authors.Add(entity);
-            return Task.CompletedTask;
-        }
+            cancellationToken.ThrowIfCancellationRequested();
 
-        public Task UpdateAsync(Author entity)
-        {
-            var index = _authors.FindIndex(a => a.Id == entity.Id);
-            if (index >= 0)
-                _authors[index] = entity;
-
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteAsync(Guid id)
-        {
-            var author = _authors.FirstOrDefault(a => a.Id == id);
+            var author = _authors.Find(a => a.Id == entity.Id);
             if (author != null)
+            {
                 _authors.Remove(author);
+            }
 
             return Task.CompletedTask;
+        }
+
+        public Task<Author> UpdateAsync(Author entity, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var index = _authors.FindIndex(a => a.Id == entity.Id);
+
+            _authors[index] = entity;
+            return Task.FromResult(entity);
         }
     }
 }

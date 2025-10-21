@@ -1,68 +1,73 @@
-﻿using BLL.DTO;
+﻿using AutoMapper;
+using BLL.DTO;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL.Models;
+using FluentValidation;
 
 namespace BLL.Services
 {
     public class AuthorService : IAuthorService
     {
         private readonly IAuthorRepository _repository;
+        private readonly IMapper _mapper;
 
-        public AuthorService(IAuthorRepository repository)
+        private readonly IValidator<AuthorDTO> _authorValidator;
+
+        public AuthorService(IAuthorRepository repository, IMapper mapper, IValidator<AuthorDTO> validator)
         {
             _repository = repository;
+            _mapper = mapper;
+            _authorValidator = validator;
         }
 
-        public async Task<IEnumerable<AuthorDTO>> GetAllAsync()
+
+        public async Task<IEnumerable<AuthorDTO>> GetAllAsync(CancellationToken cancellationToken)
         {
-            var authors = await _repository.GetAllAsync();
-            return authors.Select(a => new AuthorDTO
-            {
-                Id = a.Id,
-                Name = a.Name,
-                DateOfBirth = a.DateOfBirth
-            });
+            var authors = await _repository.GetAllAsync(cancellationToken);
+            return _mapper.Map<IEnumerable<AuthorDTO>>(authors);
         }
 
-        public async Task<AuthorDTO?> GetByIdAsync(Guid id)
+        public async Task<AuthorDTO?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var author = await _repository.GetByIdAsync(id);
-            if (author == null) return null;
+            var author = await _repository.GetByIdAsync(id, cancellationToken) ??
+                     throw new KeyNotFoundException("Author not found");
 
-            return new AuthorDTO
-            {
-                Id = author.Id,
-                Name = author.Name,
-                DateOfBirth = author.DateOfBirth
-            };
+            return _mapper.Map<AuthorDTO>(author);
         }
 
-        public async Task AddAsync(AuthorDTO dto)
+        public async Task<AuthorDTO> AddAsync(AuthorDTO dto, CancellationToken cancellationToken)
         {
-            var author = new Author
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                DateOfBirth = dto.DateOfBirth
-            };
-            await _repository.AddAsync(author);
+            var validationResult = await _authorValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var author = _mapper.Map<Author>(dto);
+            author.Id = Guid.NewGuid();
+
+            var result = await _repository.CreateAsync(author, cancellationToken);
+            return _mapper.Map<AuthorDTO>(result);
         }
 
-        public async Task UpdateAsync(AuthorDTO dto)
+
+        public async Task<AuthorDTO> UpdateAsync(AuthorDTO dto, CancellationToken cancellationToken)
         {
-            var author = new Author
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                DateOfBirth = dto.DateOfBirth
-            };
-            await _repository.UpdateAsync(author);
+            var validationResult = await _authorValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var author = _mapper.Map<Author>(dto);
+            author.Id = dto.Id;
+
+            var result = await _repository.UpdateAsync(author, cancellationToken);
+            return _mapper.Map<AuthorDTO>(result);
         }
 
-        public async Task DeleteAsync(Guid id)
+
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            await _repository.DeleteAsync(id);
+            var author = await _repository.GetByIdAsync(id, cancellationToken);
+            await _repository.DeleteAsync(author,cancellationToken);
         }
     }
 }

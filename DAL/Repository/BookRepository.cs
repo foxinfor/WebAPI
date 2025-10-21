@@ -3,43 +3,54 @@ using DAL.Models;
 
 namespace DAL.Repository
 {
-    public class BookRepository : IBookRepository
+    internal class BookRepository : IBookRepository
     {
         private readonly List<Book> _books = new();
 
-        public Task<IEnumerable<Book>> GetAllAsync()
+        public Task<Book> CreateAsync(Book entity, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_books.AsEnumerable());
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _books.Add(entity);
+            return Task.FromResult(entity);
         }
 
-        public Task<Book?> GetByIdAsync(Guid id)
+        public Task<IEnumerable<Book>> GetAllAsync(CancellationToken cancellationToken)
         {
-            var book = _books.FirstOrDefault(b => b.Id == id);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.FromResult<IEnumerable<Book>>(_books);
+        }
+
+        public Task<Book?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var book = _books.Find(b => b.Id == id);
             return Task.FromResult(book);
         }
 
-        public Task AddAsync(Book entity)
+        public Task DeleteAsync(Book entity, CancellationToken cancellationToken)
         {
-            _books.Add(entity);
-            return Task.CompletedTask;
-        }
+            cancellationToken.ThrowIfCancellationRequested();
 
-        public Task UpdateAsync(Book entity)
-        {
-            var index = _books.FindIndex(b => b.Id == entity.Id);
-            if (index >= 0)
-                _books[index] = entity;
-
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteAsync(Guid id)
-        {
-            var book = _books.FirstOrDefault(b => b.Id == id);
+            var book = _books.Find(b => b.Id == entity.Id);
             if (book != null)
+            {
                 _books.Remove(book);
+            }
 
             return Task.CompletedTask;
+        }
+
+        public Task<Book> UpdateAsync(Book entity, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var index = _books.FindIndex(a => a.Id == entity.Id);
+
+            _books[index] = entity;
+            return Task.FromResult(entity);
         }
     }
 }

@@ -1,72 +1,71 @@
-﻿using BLL.DTO;
+﻿using AutoMapper;
+using BLL.DTO;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL.Models;
+using FluentValidation;
 
 namespace BLL.Services
 {
     public class BookService : IBookService
     {
         private readonly IBookRepository _repository;
+        private readonly IMapper _mapper;
 
-        public BookService(IBookRepository repository)
+        private readonly IValidator<BookDTO> _bookValidator;
+
+        public BookService(IBookRepository repository,  IMapper mapper, IValidator<BookDTO> validator)
         {
             _repository = repository;
+            _mapper = mapper;
+            _bookValidator = validator;
         }
 
-        public async Task<IEnumerable<BookDTO>> GetAllAsync()
+        public async Task<IEnumerable<BookDTO>> GetAllAsync(CancellationToken cancellationToken)
         {
-            var books = await _repository.GetAllAsync();
-            return books.Select(b => new BookDTO
-            {
-                Id = b.Id,
-                Title = b.Title,
-                PublishedYear = b.PublishedYear,
-                AuthorId = b.AuthorId
-            });
+            var books = await _repository.GetAllAsync(cancellationToken);
+            return _mapper.Map<IEnumerable<BookDTO>>(books);
         }
 
-        public async Task<BookDTO?> GetByIdAsync(Guid id)
+        public async Task<BookDTO> GetByIdAsync(Guid id,CancellationToken cancellationToken)
         {
-            var book = await _repository.GetByIdAsync(id);
-            if (book == null) return null;
-
-            return new BookDTO
-            {
-                Id = book.Id,
-                Title = book.Title,
-                PublishedYear = book.PublishedYear,
-                AuthorId = book.AuthorId
-            };
+            var book = await _repository.GetByIdAsync(id,cancellationToken);
+            return _mapper.Map<BookDTO>(book);
         }
 
-        public async Task AddAsync(BookDTO dto)
+        public async Task<BookDTO> AddAsync(BookDTO dto, CancellationToken cancellationToken)
         {
-            var book = new Book
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                PublishedYear = dto.PublishedYear,
-                AuthorId = dto.AuthorId
-            };
-            await _repository.AddAsync(book);
+            var validationResult = await _bookValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var book = _mapper.Map<Book>(dto);
+            book.Id = Guid.NewGuid();
+
+            var result = await _repository.CreateAsync(book, cancellationToken);
+            return _mapper.Map<BookDTO>(result);
         }
 
-        public async Task UpdateAsync(BookDTO dto)
+
+        public async Task<BookDTO> UpdateAsync(BookDTO dto, CancellationToken cancellationToken)
         {
-            var book = new Book
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                PublishedYear = dto.PublishedYear,
-                AuthorId = dto.AuthorId
-            };
-            await _repository.UpdateAsync(book);
+            var validationResult = await _bookValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var book = _mapper.Map<Book>(dto);
+            book.Id = dto.Id;
+
+            var result = await _repository.UpdateAsync(book, cancellationToken);
+            return _mapper.Map<BookDTO>(result);
         }
 
-        public async Task DeleteAsync(Guid id)
+
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            await _repository.DeleteAsync(id);
+            var book = await _repository.GetByIdAsync(id,cancellationToken);
+
+            await _repository.DeleteAsync(book,cancellationToken);
         }
     }
 }
