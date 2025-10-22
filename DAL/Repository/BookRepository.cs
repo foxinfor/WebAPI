@@ -5,13 +5,11 @@ namespace DAL.Repository
 {
     internal class BookRepository : IBookRepository
     {
-        private readonly List<Book> _books = new();
-
         public Task<Book> CreateAsync(Book entity, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _books.Add(entity);
+            InMemoryDatabase.Books.Add(entity);
             return Task.FromResult(entity);
         }
 
@@ -19,14 +17,14 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult<IEnumerable<Book>>(_books);
+            return Task.FromResult<IEnumerable<Book>>(InMemoryDatabase.Books);
         }
 
         public Task<Book?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var book = _books.Find(b => b.Id == id);
+            var book = InMemoryDatabase.Books.Find(b => b.Id == id);
             return Task.FromResult(book);
         }
 
@@ -34,10 +32,10 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var book = _books.Find(b => b.Id == entity.Id);
+            var book = InMemoryDatabase.Books.Find(b => b.Id == entity.Id);
             if (book != null)
             {
-                _books.Remove(book);
+                InMemoryDatabase.Books.Remove(book);
             }
 
             return Task.CompletedTask;
@@ -47,9 +45,12 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var index = _books.FindIndex(a => a.Id == entity.Id);
+            var index = InMemoryDatabase.Books.FindIndex(b => b.Id == entity.Id);
+            if (index >= 0)
+            {
+                InMemoryDatabase.Books[index] = entity;
+            }
 
-            _books[index] = entity;
             return Task.FromResult(entity);
         }
     }

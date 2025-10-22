@@ -5,13 +5,11 @@ namespace DAL.Repository
 {
     internal class AuthorRepository : IAuthorRepository
     {
-        private readonly List<Author> _authors = new();
-
         public Task<Author> CreateAsync(Author entity, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _authors.Add(entity);
+            InMemoryDatabase.Authors.Add(entity);
             return Task.FromResult(entity);
         }
 
@@ -19,14 +17,15 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult<IEnumerable<Author>>(_authors);
+            return Task.FromResult<IEnumerable<Author>>(InMemoryDatabase.Authors);
         }
 
         public Task<Author?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var author = _authors.Find(a => a.Id == id);
+
+            var author = InMemoryDatabase.Authors.Find(a => a.Id == id);
             return Task.FromResult(author);
         }
 
@@ -34,10 +33,10 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var author = _authors.Find(a => a.Id == entity.Id);
+            var author = InMemoryDatabase.Authors.Find(a => a.Id == entity.Id);
             if (author != null)
             {
-                _authors.Remove(author);
+                InMemoryDatabase.Authors.Remove(author);
             }
 
             return Task.CompletedTask;
@@ -47,9 +46,11 @@ namespace DAL.Repository
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var index = _authors.FindIndex(a => a.Id == entity.Id);
-
-            _authors[index] = entity;
+            var index = InMemoryDatabase.Authors.FindIndex(a => a.Id == entity.Id);
+            if (index >= 0)
+            {
+                InMemoryDatabase.Authors[index] = entity;
+            }
             return Task.FromResult(entity);
         }
     }

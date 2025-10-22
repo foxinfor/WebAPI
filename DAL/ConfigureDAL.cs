@@ -8,8 +8,8 @@ namespace DAL
     {
         public static void AddRepositories(this IServiceCollection services)
         {
-            services.AddSingleton<IBookRepository, BookRepository>();
-            services.AddSingleton<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
         }
     }
 }
