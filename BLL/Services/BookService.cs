@@ -27,7 +27,7 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<BookDTO>>(books);
         }
 
-        public async Task<BookDTO> GetByIdAsync(Guid id,CancellationToken cancellationToken)
+        public async Task<BookDTO> GetByIdAsync(int id,CancellationToken cancellationToken)
         {
             var book = await _repository.GetByIdAsync(id,cancellationToken);
             return _mapper.Map<BookDTO>(book);
@@ -40,7 +40,7 @@ namespace BLL.Services
                 throw new ValidationException(validationResult.Errors);
 
             var book = _mapper.Map<Book>(dto);
-            book.Id = Guid.NewGuid();
+            //book.Id = Guid.NewGuid();
 
             var result = await _repository.CreateAsync(book, cancellationToken);
             return _mapper.Map<BookDTO>(result);
@@ -61,7 +61,7 @@ namespace BLL.Services
         }
 
 
-        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var book = await _repository.GetByIdAsync(id,cancellationToken);
 

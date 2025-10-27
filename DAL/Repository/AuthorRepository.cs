@@ -20,7 +20,7 @@ namespace DAL.Repository
             return Task.FromResult<IEnumerable<Author>>(InMemoryDatabase.Authors);
         }
 
-        public Task<Author?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<Author?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
