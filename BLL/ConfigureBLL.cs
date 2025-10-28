@@ -5,15 +5,16 @@ using BLL.Services;
 using BLL.Validators;
 using DAL;
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL
 {
     public static class ConfigureBLL
     {
-        public static void ConfigureBll(this IServiceCollection services)
+        public static void ConfigureBll(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddRepositories();
+            services.AddRepositories(configuration);
 
             services.AddAutoMapper(cfg =>
             {

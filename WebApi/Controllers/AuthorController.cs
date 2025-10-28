@@ -32,7 +32,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetAuthor(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAuthor(int id, CancellationToken cancellationToken)
         {
             var author = await _authorService.GetByIdAsync(id, cancellationToken);
 
@@ -49,7 +49,7 @@ namespace WebApi.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteAuthor(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteAuthor(int id, CancellationToken cancellationToken)
         {
             await _authorService.DeleteAsync(id, cancellationToken);
 
