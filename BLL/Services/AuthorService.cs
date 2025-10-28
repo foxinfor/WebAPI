@@ -28,7 +28,7 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<AuthorDTO>>(authors);
         }
 
-        public async Task<AuthorDTO?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<AuthorDTO?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var author = await _repository.GetByIdAsync(id, cancellationToken) ??
                      throw new KeyNotFoundException("Author not found");
@@ -43,7 +43,7 @@ namespace BLL.Services
                 throw new ValidationException(validationResult.Errors);
 
             var author = _mapper.Map<Author>(dto);
-            author.Id = Guid.NewGuid();
+            //author.Id = Guid.NewGuid();
 
             var result = await _repository.CreateAsync(author, cancellationToken);
             return _mapper.Map<AuthorDTO>(result);
@@ -64,7 +64,7 @@ namespace BLL.Services
         }
 
 
-        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var author = await _repository.GetByIdAsync(id, cancellationToken);
             await _repository.DeleteAsync(author,cancellationToken);

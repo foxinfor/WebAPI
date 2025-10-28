@@ -8,8 +8,18 @@ namespace DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Author> builder)
         {
-            //дописать конфигурацию
-            throw new NotImplementedException();
+            builder.HasKey(a => a.Id);
+
+            builder.Property(a => a.Name)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            builder.Property(a => a.DateOfBirth)
+                   .IsRequired();
+
+            builder.HasMany(a => a.Books)
+                   .WithOne(b => b.Author)
+                   .HasForeignKey(b => b.AuthorId);
         }
     }
 }

@@ -1,57 +1,60 @@
 using DAL.Interfaces;
 using DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repository
 {
     internal class AuthorRepository : IAuthorRepository
     {
-        public Task<Author> CreateAsync(Author entity, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
+        private readonly LibraryContext _context;
 
-            InMemoryDatabase.Authors.Add(entity);
-            return Task.FromResult(entity);
+        public AuthorRepository(LibraryContext context)
+        {
+            _context = context;
         }
 
-        public Task<IEnumerable<Author>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<Author> CreateAsync(Author entity, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult<IEnumerable<Author>>(InMemoryDatabase.Authors);
+            await _context.Authors.AddAsync(entity, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return entity;
         }
 
-        public Task<Author?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Author>> GetAllAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-
-            var author = InMemoryDatabase.Authors.Find(a => a.Id == id);
-            return Task.FromResult(author);
+            return await _context.Authors
+                .Include(a => a.Books)
+                .ToListAsync(cancellationToken);
         }
 
-        public Task DeleteAsync(Author entity, CancellationToken cancellationToken)
+        public async Task<Author?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var author = InMemoryDatabase.Authors.Find(a => a.Id == entity.Id);
-            if (author != null)
-            {
-                InMemoryDatabase.Authors.Remove(author);
-            }
-
-            return Task.CompletedTask;
+            return await _context.Authors
+                .Include(a => a.Books)
+                .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
         }
 
-        public Task<Author> UpdateAsync(Author entity, CancellationToken cancellationToken)
+        public async Task DeleteAsync(Author entity, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var index = InMemoryDatabase.Authors.FindIndex(a => a.Id == entity.Id);
-            if (index >= 0)
-            {
-                InMemoryDatabase.Authors[index] = entity;
-            }
-            return Task.FromResult(entity);
+            _context.Authors.Remove(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<Author> UpdateAsync(Author entity, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _context.Authors.Update(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+            return entity;
         }
     }
 }
