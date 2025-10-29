@@ -31,7 +31,7 @@ namespace WebApi.Controllers
             return Ok(authors);
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAuthor(int id, CancellationToken cancellationToken)
         {
             var author = await _authorService.GetByIdAsync(id, cancellationToken);
@@ -39,7 +39,7 @@ namespace WebApi.Controllers
             return Ok(author);
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor([FromBody] AuthorDTO author,
             CancellationToken cancellationToken)
         {
@@ -48,7 +48,7 @@ namespace WebApi.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id, CancellationToken cancellationToken)
         {
             await _authorService.DeleteAsync(id, cancellationToken);

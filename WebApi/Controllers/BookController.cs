@@ -31,16 +31,16 @@ namespace WebApi.Controllers
             return Ok(books);
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetBook(Guid id, CancellationToken cancellationToken)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBook(int id, CancellationToken cancellationToken)
         {
             var book = await _bookService.GetByIdAsync(id, cancellationToken);
 
             return Ok(book);
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateBook(Guid id, [FromBody] BookDTO book,
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDTO book,
             CancellationToken cancellationToken)
         {
             var update = await _bookService.UpdateAsync(book, cancellationToken);
@@ -48,8 +48,8 @@ namespace WebApi.Controllers
             return Ok(update);
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteBook(Guid id, CancellationToken cancellationToken)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook(int id, CancellationToken cancellationToken)
         {
             await _bookService.DeleteAsync(id, cancellationToken);
 
