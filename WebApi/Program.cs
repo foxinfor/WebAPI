@@ -1,4 +1,7 @@
 using BLL;
+using DAL;
+using DAL.Configurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi
 {
@@ -15,6 +18,15 @@ namespace WebApi
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<LibraryContext>();
+                dbContext.Database.Migrate();
+                FillDatabase.Fill(dbContext);
+            }
+
+
 
             if (app.Environment.IsDevelopment())
             {
