@@ -17,8 +17,8 @@ namespace DAL.Configurations
             if (!libraryContext.Books.Any())
             {
                 libraryContext.Books.AddRange(
-                    new Book { Title = "Foundation", AuthorId = 1 },
-                    new Book { Title = "2001: A Space Odyssey", AuthorId = 2 }
+                    new Book { Title = "Foundation", PublishedYear = 2016,AuthorId = 1 },
+                    new Book { Title = "2001: A Space Odyssey",PublishedYear = 2014, AuthorId = 2 }
                 );
             }
 
