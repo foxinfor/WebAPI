@@ -40,7 +40,6 @@ namespace BLL.Services
                 throw new ValidationException(validationResult.Errors);
 
             var book = _mapper.Map<Book>(dto);
-            //book.Id = Guid.NewGuid();
 
             var result = await _repository.CreateAsync(book, cancellationToken);
             return _mapper.Map<BookDTO>(result);
@@ -53,8 +52,7 @@ namespace BLL.Services
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            var book = _mapper.Map<Book>(dto);
-            book.Id = dto.Id;
+            var book = _mapper.Map<Book>(dto);  
 
             var result = await _repository.UpdateAsync(book, cancellationToken);
             return _mapper.Map<BookDTO>(result);
@@ -68,14 +66,11 @@ namespace BLL.Services
             await _repository.DeleteAsync(book,cancellationToken);
         }
 
-        public async Task<IEnumerable<BookDTO>> GetBooksAfterYearAsync(int year, CancellationToken cancellationToken)
+        public async Task<IEnumerable<BookDTO>> GetBooksByYearAsync(int year, CancellationToken cancellationToken)
         {
-            var books = await _repository.GetAllAsync(cancellationToken);
+            var books = await _repository.GetBooksByYearAsync(year,cancellationToken);
 
-            var filtered = books
-                .Where(b => b.PublishedYear > year);
-
-            return _mapper.Map<IEnumerable<BookDTO>>(filtered);
+            return _mapper.Map<IEnumerable<BookDTO>>(books);
         }
     }
 }

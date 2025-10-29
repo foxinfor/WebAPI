@@ -36,8 +36,14 @@ namespace WebApi.Controllers
         {
             var author = await _authorService.GetByIdAsync(id, cancellationToken);
 
+            if (author is null)
+            {
+                return NotFound($"Author with ID {id} not found.");
+            }
+
             return Ok(author);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor([FromBody] AuthorDTO author,
@@ -56,15 +62,15 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
-        [HttpGet("with-book-count")]
+        [HttpGet("count/book")]
         public async Task<IActionResult> GetAuthorsWithBookCount(CancellationToken cancellationToken)
         {
             var authors = await _authorService.GetAuthorsWithCountBookAsync(cancellationToken);
             return Ok(authors);
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> GetAuthorByName([FromQuery] string name, CancellationToken cancellationToken)
+        [HttpGet("search/{name}")]
+        public async Task<IActionResult> GetAuthorByName(string name, CancellationToken cancellationToken)
         {
             var author = await _authorService.GetAuthorByNameAsync(name, cancellationToken);
             if (author is null)
@@ -72,6 +78,5 @@ namespace WebApi.Controllers
 
             return Ok(author);
         }
-
     }
 }

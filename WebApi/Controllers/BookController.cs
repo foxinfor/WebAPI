@@ -59,7 +59,7 @@ namespace WebApi.Controllers
         [HttpGet("after-year/{year}")]
         public async Task<IActionResult> GetBooksAfterYear(int year, CancellationToken cancellationToken)
         {
-            var books = await _bookService.GetBooksAfterYearAsync(year, cancellationToken);
+            var books = await _bookService.GetBooksByYearAsync(year, cancellationToken);
             return Ok(books);
         }
 

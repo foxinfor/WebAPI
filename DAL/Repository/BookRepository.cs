@@ -56,5 +56,16 @@ namespace DAL.Repository
             await _context.SaveChangesAsync(cancellationToken);
             return entity;
         }
+
+        public async Task<IEnumerable<Book>> GetBooksByYearAsync(int year, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return await _context.Books
+                .Include(b => b.Author)
+                .Where(b => b.PublishedYear > year)
+                .ToListAsync(cancellationToken);
+        }
+
     }
 }

@@ -71,25 +71,19 @@ namespace BLL.Services
             await _repository.DeleteAsync(author,cancellationToken);
         }
 
-        public async Task<IEnumerable<AuthorWithCountBooks>> GetAuthorsWithCountBookAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<AuthorDTO>> GetAuthorsWithCountBookAsync(CancellationToken cancellationToken)
         {
             var authors = await _repository.GetAllAsync(cancellationToken);
-            var books = await _bookRepository.GetAllAsync(cancellationToken);
 
-            var authorDtos = authors.Select(author =>
+            return authors.Select(author => new AuthorDTO
             {
-                var count = books.Count(b => b.AuthorId == author.Id);
-                return new AuthorWithCountBooks
-                {
-                    Id = author.Id,
-                    Name = author.Name,
-                    DateOfBirth = author.DateOfBirth,
-                    BookCount = count
-                };
+                Id = author.Id,
+                Name = author.Name,
+                DateOfBirth = author.DateOfBirth,
+                BookCount = author.Books?.Count ?? 0
             });
-
-            return authorDtos;
         }
+
 
 
         public async Task<AuthorDTO?> GetAuthorByNameAsync(string name, CancellationToken cancellationToken)

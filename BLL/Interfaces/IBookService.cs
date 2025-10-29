@@ -4,6 +4,6 @@ namespace BLL.Interfaces
 {
     public interface IBookService : IService<BookDTO>
     {
-        Task<IEnumerable<BookDTO?>> GetBooksAfterYearAsync(int year, CancellationToken cancellationToken);
+        Task<IEnumerable<BookDTO?>> GetBooksByYearAsync(int year, CancellationToken cancellationToken);
     }
 }
