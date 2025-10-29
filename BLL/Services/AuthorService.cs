@@ -102,12 +102,8 @@ namespace BLL.Services
 
             if (match is null) return null;
 
-            return new AuthorDTO
-            {
-                Id = match.Id,
-                Name = match.Name,
-                DateOfBirth = match.DateOfBirth,
-            };
+
+            return _mapper.Map<AuthorDTO?>(match);
         }
     }
 }

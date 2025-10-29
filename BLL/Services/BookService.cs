@@ -73,17 +73,9 @@ namespace BLL.Services
             var books = await _repository.GetAllAsync(cancellationToken);
 
             var filtered = books
-                .Where(b => b.PublishedYear > year)
-                .Select(b => new BookDTO
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    AuthorId = b.AuthorId,
-                    PublishedYear = b.PublishedYear
-                });
+                .Where(b => b.PublishedYear > year);
 
-            return filtered;
+            return _mapper.Map<IEnumerable<BookDTO>>(filtered);
         }
-
     }
 }
