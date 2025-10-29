@@ -55,5 +55,13 @@ namespace WebApi.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("after-year/{year}")]
+        public async Task<IActionResult> GetBooksAfterYear(int year, CancellationToken cancellationToken)
+        {
+            var books = await _bookService.GetBooksAfterYearAsync(year, cancellationToken);
+            return Ok(books);
+        }
+
     }
 }

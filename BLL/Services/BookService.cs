@@ -67,5 +67,23 @@ namespace BLL.Services
 
             await _repository.DeleteAsync(book,cancellationToken);
         }
+
+        public async Task<IEnumerable<BookDTO>> GetBooksAfterYearAsync(int year, CancellationToken cancellationToken)
+        {
+            var books = await _repository.GetAllAsync(cancellationToken);
+
+            var filtered = books
+                .Where(b => b.PublishedYear > year)
+                .Select(b => new BookDTO
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    AuthorId = b.AuthorId,
+                    PublishedYear = b.PublishedYear
+                });
+
+            return filtered;
+        }
+
     }
 }

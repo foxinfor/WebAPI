@@ -10,15 +10,17 @@ namespace BLL.Services
     public class AuthorService : IAuthorService
     {
         private readonly IAuthorRepository _repository;
+        private readonly IBookRepository _bookRepository;
         private readonly IMapper _mapper;
 
         private readonly IValidator<AuthorDTO> _authorValidator;
 
-        public AuthorService(IAuthorRepository repository, IMapper mapper, IValidator<AuthorDTO> validator)
+        public AuthorService(IAuthorRepository repository, IBookRepository bookRepository, IMapper mapper, IValidator<AuthorDTO> validator)
         {
             _repository = repository;
             _mapper = mapper;
             _authorValidator = validator;
+            _bookRepository = bookRepository;
         }
 
 
@@ -43,7 +45,6 @@ namespace BLL.Services
                 throw new ValidationException(validationResult.Errors);
 
             var author = _mapper.Map<Author>(dto);
-            //author.Id = Guid.NewGuid();
 
             var result = await _repository.CreateAsync(author, cancellationToken);
             return _mapper.Map<AuthorDTO>(result);
@@ -68,6 +69,45 @@ namespace BLL.Services
         {
             var author = await _repository.GetByIdAsync(id, cancellationToken);
             await _repository.DeleteAsync(author,cancellationToken);
+        }
+
+        public async Task<IEnumerable<AuthorWithCountBooks>> GetAuthorsWithCountBookAsync(CancellationToken cancellationToken)
+        {
+            var authors = await _repository.GetAllAsync(cancellationToken);
+            var books = await _bookRepository.GetAllAsync(cancellationToken);
+
+            var authorDtos = authors.Select(author =>
+            {
+                var count = books.Count(b => b.AuthorId == author.Id);
+                return new AuthorWithCountBooks
+                {
+                    Id = author.Id,
+                    Name = author.Name,
+                    DateOfBirth = author.DateOfBirth,
+                    BookCount = count
+                };
+            });
+
+            return authorDtos;
+        }
+
+
+        public async Task<AuthorDTO?> GetAuthorByNameAsync(string name, CancellationToken cancellationToken)
+        {
+            var author = await _repository
+                .GetAllAsync(cancellationToken);
+
+            var match = author
+                .FirstOrDefault(a => a.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+
+            if (match is null) return null;
+
+            return new AuthorDTO
+            {
+                Id = match.Id,
+                Name = match.Name,
+                DateOfBirth = match.DateOfBirth,
+            };
         }
     }
 }

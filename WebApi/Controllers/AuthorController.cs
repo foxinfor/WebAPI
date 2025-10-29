@@ -55,5 +55,23 @@ namespace WebApi.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("with-book-count")]
+        public async Task<IActionResult> GetAuthorsWithBookCount(CancellationToken cancellationToken)
+        {
+            var authors = await _authorService.GetAuthorsWithCountBookAsync(cancellationToken);
+            return Ok(authors);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> GetAuthorByName([FromQuery] string name, CancellationToken cancellationToken)
+        {
+            var author = await _authorService.GetAuthorByNameAsync(name, cancellationToken);
+            if (author is null)
+                return NotFound($"Author with name containing '{name}' not found.");
+
+            return Ok(author);
+        }
+
     }
 }
